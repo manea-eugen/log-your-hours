@@ -1,6 +1,6 @@
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     // width = 1900 - margin.left - margin.right,
-    width = parseInt(d3.select('#graph-placeholder').style('width'), 10) - 30 * 2 , // Minus css padding
+    width = parseInt(d3.select('#graph-placeholder').style('width'), 10) - 30 * 2, // Minus css padding
     height = 600 - margin.top - margin.bottom,
     xAxisHeight = 12,
     svg = d3.select("#graph-placeholder")
@@ -9,21 +9,22 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
-
-
-
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
 
 // load the data
 d3.json("/git", function (error, data) {
 
     var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
-    // var amountFn = function(d) { return d.amount }
-    // var amountFn = function (d) {
-    //     return d3.randomUniform(1, 10)()
-    // };
+
+    var tooltipDateFormatter = d3.timeFormat("%d/%m : %A");
+
+    // var nest = d3.nest()
+    //     .key(function(d) { return d.authorEmail; })
+    //     .entries(data);
+
+
     var dateFn = function (d) {
         return strictIsoParse(d.commitDate)
     };
@@ -32,13 +33,28 @@ d3.json("/git", function (error, data) {
         .range([200, width])
         .domain(d3.extent(data, dateFn));
 
-
     var y = d3.scalePoint()
-            .range([height - 20, 0 ])
-            .domain(data.map(function (d) {
-                return d.authorEmail
-            }))       ;
+        .range([height - 20, 0])
+        .domain(data.map(function (d) {
+            return d.authorEmail
+        }));
 
+    var tool_tip = d3.tip()
+        .attr("class", "d3-tip")
+        .offset([-8, 0])
+        // .html(function(d) { console.log(d); return "Radius: " + d.authorEmail; });
+        .html(function (d) {
+
+
+
+
+            return '<div class="panel radius">' +
+                '<h5>' + d.authorEmail + ' ' + d.authorName + '</h5>' +
+                '<p>' + tooltipDateFormatter(strictIsoParse(d.commitDate)) + '</p>' +
+                '</div>'
+
+        });
+    svg.call(tool_tip);
 
     svg.append("g")
         .selectAll("circle")
@@ -50,7 +66,6 @@ d3.json("/git", function (error, data) {
             return x(dateFn(d))
         })
         .attr("cy", function (d) {
-            console.log(y(d.authorEmail));
             return y(d.authorEmail)
         })
         .attr("fill", function (d) {
@@ -62,6 +77,8 @@ d3.json("/git", function (error, data) {
                     return 'rgba(0,0,0,0.5)';
             }
         })
+        .on('mouseover', tool_tip.show)
+        .on('mouseout', tool_tip.hide);
 
     // Add the x Axis
     svg.append("g")
@@ -74,7 +91,7 @@ d3.json("/git", function (error, data) {
     // text label for the x axis
     svg.append("text")
         .attr("transform",
-            "translate(" + (width/2) + " ," +
+            "translate(" + (width / 2) + " ," +
             (height + margin.top) + ")")
         .style("text-anchor", "middle")
         .text("Date");

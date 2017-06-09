@@ -36,7 +36,6 @@ var GitRepoService = {
                     if (branchName.indexOf('heads') === -1) {
                         continue; // Only the local branches
                     }
-                    console.log(branchName);
                     promises.push(repo.getBranchCommit(branchName));
                 }
                 return Promise.all(promises);
@@ -76,7 +75,7 @@ var GitRepoService = {
 
 
                         GitEntryModel.findOne(query, function (err, result) {
-                            if (result != null) {
+                            if (result !== null) {
                                 GitEntryModel.update(query, data, options, callback);
                             } else {
                                 var gitEntry = new GitEntryModel(data);

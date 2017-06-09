@@ -1,5 +1,10 @@
 extends layout
 
 block content
-  h1 Git graphs
-  div#graph-placeholder
+    h1 Git graphs
+    .row.collapse
+        .ten.columns
+            input#email(placeholder="e.manea@youwe.nl", value="e.manea@youwe.nl", type='text')
+        .two.columns
+            a.button.expand.postfix Search
+    div#graph-placeholder
