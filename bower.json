@@ -1,0 +1,21 @@
+{
+  "name": "log-your-hours",
+  "description": "",
+  "main": "",
+  "authors": [
+    "Manea Eugen <e.manea@youwe.nl>"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "foundation": "^5.5.3",
+    "d3": "^4.9.1"
+  }
+}

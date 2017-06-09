@@ -1,0 +1,40 @@
+doctype html
+html
+    head
+        title="Log your hours"
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        link(rel='stylesheet', href='/bower_components/foundation/css/normalize.min.css')
+        link(rel='stylesheet', href='/bower_components/foundation/css/foundation.css')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+        script(src='/bower_components/modernizr/modernizr.js')
+    body
+        nav.top-bar(data-topbar='', role='navigation')
+            ul.title-area
+                li.name
+                    h1
+                        a(href='/') Log your hours
+                // Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone
+                li.toggle-topbar.menu-icon
+                    a(href='/')
+                        span Menu
+            section.top-bar-section
+                // Right Nav Section
+                ul.left
+                    li.active
+                        a(href='/') To be done
+
+
+        section.scroll-container(role='main')
+            .row.expanded.columns.fullWidth
+                .large-12
+                    block content
+        script(src='/bower_components/jquery/dist/jquery.min.js')
+        script(src='/bower_components/fastclick/lib/fastclick.js')
+        script(src='/bower_components/jquery.cookie/jquery.cookie.js')
+        script(src='/bower_components/jquery-placeholder/jquery.placeholder.js')
+        script(src='/bower_components/foundation/js/foundation.js')
+        script(src='/bower_components/d3/d3.min.js')
+        script(src='/javascripts/d3/git.chart.js')
+        script(src='/javascripts/app.js')
+
