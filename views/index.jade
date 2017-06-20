@@ -2,9 +2,14 @@ extends layout
 
 block content
     h1 Git graphs
-    .row.collapse
-        .ten.columns
-            input#email(placeholder="e.manea@youwe.nl", value="e.manea@youwe.nl", type='text')
-        .two.columns
-            a.button.expand.postfix Search
+    .row
+        .large-12.columns
+            form
+                label
+                    | Select Box
+                    select#authorEmail
+                        option(value='') All
+                        option(value='e.manea@youwe.nl', selected='true') Manea
+    #option
+        input(name='updateButton', type='button', value='Update', onclick='updateData()')
     div#graph-placeholder

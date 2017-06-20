@@ -49,5 +49,5 @@ app.use(function(err, req, res, next) {
 mongoose.connect('mongodb://localhost/log-your-hours');
 
 // This is debug
-// GitRepoService.fetchGitInfo();
+GitRepoService.fetchGitInfo();
 module.exports = app;

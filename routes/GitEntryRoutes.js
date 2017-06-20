@@ -6,6 +6,7 @@ var GitEntryController = require('../controllers/GitEntryController.js');
  * GET
  */
 router.get('/', GitEntryController.list);
+
 /*
  * GET For now
  */
