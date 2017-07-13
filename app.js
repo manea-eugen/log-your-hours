@@ -8,6 +8,8 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var gitEntryRoutes = require('./routes/GitEntryRoutes');
 var GitRepoService = require('./services/GitRepoService.js');
+var settingsRoutes = require('./routes/SettingsRoutes');
+var repoRoutes = require('./routes/RepoRoutes');
 
 var app = express();
 
@@ -27,6 +29,8 @@ app.use('/bower_components', express.static(path.join(__dirname, 'bower_componen
 
 app.use('/', index);
 app.use('/git', gitEntryRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/repo', repoRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -49,5 +53,5 @@ app.use(function(err, req, res, next) {
 mongoose.connect('mongodb://localhost/log-your-hours');
 
 // This is debug
-GitRepoService.fetchGitInfo();
+// GitRepoService.fetchGitInfo();
 module.exports = app;

@@ -15,8 +15,9 @@
     "tests"
   ],
   "dependencies": {
-    "foundation": "^5.5.3",
     "d3": "^4.9.1",
-    "d3-tip": "^0.7.1"
+    "d3-tip": "^0.7.1",
+    "foundation": "^5.5.3",
+    "components-font-awesome": "^4.7.0"
   }
 }
