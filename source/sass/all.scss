@@ -10,6 +10,9 @@ div > svg{
 
 
 #repos-table{
+  td {
+    vertical-align: top;
+  }
   input[type="text"],button.tiny{
     margin: 0;
   }

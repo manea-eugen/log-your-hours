@@ -16,5 +16,10 @@ block content
                 tbody
                     tr
                         td Ibood
-                        td Content Goes Here
+                        td
+                            .columns
+                                label.error
+                                    | Error
+                                    input.error(type='text')
+                                small.error Invalid entry
                         td This is longer content Donec id elit non mi porta gravida at eget metus.

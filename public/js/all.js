@@ -187,12 +187,28 @@ var ReposTable = {
                 });
             })
             .fail(function (res) {
-                var error = jQuery.parseJSON( res.responseText );
+                var error = jQuery.parseJSON(res.responseText);
                 alert(error.message)
-            })
-            ;
+            });
     },
+    validateInput: function (el) {
+        var required = el.attr('required');
 
+
+        if (required === 'required' && el.val() === '') {
+            if (!el.hasClass('error')) {
+                el.addClass('error')
+                    .after($('<small>')
+                        .addClass('error')
+                        .html('Required field')
+                    );
+            }
+        } else {
+            el.removeClass('error')
+                .next('small.error')
+                .remove()
+        }
+    },
     addRow: function (id, name, path) {
         var repoTable = $('table#repos-table');
 
@@ -204,16 +220,22 @@ var ReposTable = {
                 )
                 .append($('<td>')
                     .addClass('name-cell')
-                    .append($('<input>')
-                        .attr('type', 'text')
-                        .val(name)
+                    .append($('<div>')
+                        .append($('<input>')
+                            .attr('type', 'text')
+                            .attr('required', true)
+                            .val(name)
+                        )
                     )
                 )
                 .append($('<td>')
                     .addClass('path-cell')
-                    .append($('<input>')
-                        .attr('type', 'text')
-                        .val(path)
+                    .append($('<div>')
+                        .append($('<input>')
+                            .attr('type', 'text')
+                            .attr('required', true)
+                            .val(path)
+                        )
                     )
                 )
                 .append($('<td>')
@@ -248,11 +270,9 @@ var ReposTable = {
 };
 
 
-
 $(function () {
 
     ReposTable.load();
-
 
 
     $(document).on('click', '#new-repo', function () {
@@ -281,6 +301,18 @@ $(function () {
             path: path
         };
 
+        if (!name) {
+            ReposTable.validateInput(nameCell.find('input'));
+        }
+  if (!path) {
+            ReposTable.validateInput(pathCell.find('input'));
+        }
+        if(!name || !path){
+            el.attr('disabled', false);
+            return;
+        }
+
+
         if (!id) {
             method = 'POST';
             url = '/api/repo';
@@ -298,13 +330,18 @@ $(function () {
                 idCell.html(res._id);
             })
             .fail(function (res) {
-                var error = jQuery.parseJSON( res.responseText );
+                var error = jQuery.parseJSON(res.responseText);
                 alert(error.message)
             })
             .always(function () {
                 el.attr('disabled', false);
 
             });
+    });
+
+    $(document).on('blur', '#repos-table input', function () {
+        var el = $(this);
+        ReposTable.validateInput(el);
     });
 
     // Delete action
@@ -317,7 +354,7 @@ $(function () {
 
         el.attr('disabled', true);
 
-        if(!id){
+        if (!id) {
             currentRow.remove();
         }
 
@@ -331,7 +368,7 @@ $(function () {
                 currentRow.remove();
             })
             .fail(function (res) {
-                var error = jQuery.parseJSON( res.responseText );
+                var error = jQuery.parseJSON(res.responseText);
                 el.attr('disabled', false);
                 alert(error.message)
             })
