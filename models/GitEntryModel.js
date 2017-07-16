@@ -13,7 +13,8 @@ var GitEntrySchema = new Schema({
     commitDate: Date,
     
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    repo: {type: Schema.Types.ObjectId, ref: 'Repo'}
 },{strict: true});
 
 module.exports = mongoose.model('GitEntry', GitEntrySchema);

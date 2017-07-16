@@ -1,10 +1,11 @@
 var GitEntryModel = require('../models/GitEntryModel.js');
+var RepoModel = require('../models/RepoModel.js');
 var GitRepoService = require('../services/GitRepoService.js');
 
 /**
  * GitEntryController.js
  *
- * @description :: Server-side logic for managing GitEntrys.
+ * @description :: Server-side logic for managing GitEntries.
  */
 module.exports = {
 
@@ -18,6 +19,32 @@ module.exports = {
             message: 'Fetch is in progress'
         });
 
+    }, /**
+     * GitEntryController.fetchGitInfo()
+     */
+    fetchGitInfoById: function (req, res) {
+
+        var id = req.params.id;
+
+        RepoModel.findOne({_id: id}, function (err, Repo) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when getting Repo.',
+                    error: err
+                });
+            }
+            if (!Repo) {
+                return res.status(404).json({
+                    message: 'No such Repo'
+                });
+            }
+
+            GitRepoService.fetchGitInfo(Repo);
+
+
+            return res.json(Repo);
+        });
+
     },
     /**
      * GitEntryController.list()
@@ -25,24 +52,74 @@ module.exports = {
     list: function (req, res) {
 
         var authorEmail = req.query.authorEmail,
+            repoId = req.query.repoId,
             query = {};
 
 
-        if (authorEmail)
-            query = {authorEmail: authorEmail};
+        if (authorEmail) {
+            query.authorEmail = authorEmail;
+        }
 
-
+        if (repoId) {
+            query.repo = repoId;
+        }
+console.log(query);
         GitEntryModel
             .find(query)
             .sort({commitDate: -1, authorName: -1})
-            .exec(function (err, GitEntrys) {
+            .populate('repo')
+            .exec(function (err, GitEntries) {
                 if (err) {
                     return res.status(500).json({
                         message: 'Error when getting GitEntry.',
                         error: err
                     });
                 }
-                return res.json(GitEntrys);
+                return res.json(GitEntries);
+            });
+    },
+    /**
+     * GitEntryController.getAllAuthorsEmail()
+     */
+    getAllAuthorsEmail: function (req, res) {
+        GitEntryModel
+            .find()
+            .distinct('authorEmail', function (err, emails) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when getting authors email.',
+                        error: err
+                    });
+                }
+
+                return res.json(emails);
+            });
+    },
+    /**
+     * GitEntryController.getAllRepositories()
+     */
+    getAllRepositories: function (req, res) {
+        GitEntryModel
+            .find()
+            .distinct('repo', function (err, repoIds) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when getting distinct repo ids.',
+                        error: err
+                    });
+                }
+
+
+                RepoModel.find({'_id':{$in : repoIds}},function(err,result) {
+                    if (err) {
+                        return res.status(500).json({
+                            message: 'Error when getting repositories by id',
+                            error: err
+                        });
+                    }
+
+                    return res.json(result);
+                });
             });
     },
 

@@ -6,10 +6,13 @@ block content
         .large-12.columns
             form
                 label
-                    | Select Box
+                    i.fa.fa-spinner.fa-spin#repositoriesLoader
+                    |   Repository
+                    select#repositories
+                label
+                    i.fa.fa-spinner.fa-spin#authorEmailLoader
+                    |   Author
                     select#authorEmail
-                        option(value='') All
-                        option(value='e.manea@youwe.nl', selected='true') Manea
-    #option
-        input(name='updateButton', type='button', value='Update', onclick='updateData()')
+    div
+        input#updateButton(name='updateButton', type='button', value='Update')
     div#graph-placeholder

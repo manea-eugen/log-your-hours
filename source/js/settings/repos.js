@@ -77,6 +77,17 @@ var ReposTable = {
                             )
                         )
                         .append($('<button>')
+                            .addClass('warning')
+                            .addClass('tiny')
+                            .addClass('sync-repo')
+                            .text(' Sync')
+                            .prepend($('<i>')
+                                .addClass('fa')
+                                .addClass('fa-refresh')
+                                .attr('aria-hidden', true)
+                            )
+                        )
+                        .append($('<button>')
                             .addClass('alert')
                             .addClass('tiny')
                             .addClass('delete-repo')
@@ -180,6 +191,7 @@ $(function () {
 
         if (!id) {
             currentRow.remove();
+            return;
         }
 
         var url = '/api/repo/' + id;
@@ -195,6 +207,40 @@ $(function () {
                 var error = jQuery.parseJSON(res.responseText);
                 el.attr('disabled', false);
                 alert(error.message)
+            })
+    });
+
+    // Delete action
+    $(document).on('click', '.sync-repo', function () {
+        var el = $(this),
+            currentRow = el.closest('tr'),
+            idCell = currentRow.find('td.id-cell'),
+            id = idCell.html()
+            ;
+
+        el.attr('disabled', true);
+        el.find('.fa-refresh').addClass('fa-spin');
+
+       
+
+        var url = '/git/fetch/' + id;
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+        })
+            .done(function () {
+                console.log('got response from server');
+                // currentRow.remove();
+            })
+            .fail(function (res) {
+                var error = jQuery.parseJSON(res.responseText);
+                el.attr('disabled', false);
+                alert(error.message)
+            })
+            .always(function () {
+                el.attr('disabled', false);
+                el.find('.fa-refresh').removeClass('fa-spin');
             })
     })
 });
