@@ -2,11 +2,31 @@ var g;
 
 var CommitsVisualizer = function () {
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-// width = 1900 - margin.left - margin.right,
-        width = parseInt(d3.select('#graph-placeholder').style('width'), 10) - (margin.left + margin.right) - 15, // Minus css padding
+    var margin = {top: 10, right: 10, bottom: 10, left: 10},
+        marginArea = {top: 10, right: 15, bottom: 10, left: 0},
+        // graphWidth = d3.select('#graph-placeholder').node().getBoundingClientRect().width,
+        graphWidth = 600,
+        width = graphWidth - margin.left - margin.right,
         height = 600 - margin.top - margin.bottom,
-        xAxisHeight = 12;
+        areaHeight = height, // TO BE CALCULATED
+        xAxisHeight = 12,
+        yAxisWidth = 200,
+        areaWidth = width - marginArea.left- marginArea.right  - yAxisWidth;
+
+console.log(graphWidth);
+console.log(margin.left);
+console.log(margin.right);
+console.log(width);
+console.log(marginArea.left);
+console.log(marginArea.right);
+console.log(areaWidth);
+
+
+
+
+
+    // console.log(width - marginArea.left - marginArea.right);
+    // console.log(areaHeight);
 
     var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
     var tooltipDateFormatter = d3.timeFormat("%d/%m : %A")
@@ -33,16 +53,41 @@ var CommitsVisualizer = function () {
 
 
 
-
     this.init = function () {
         this.svg = d3.select("#graph-placeholder")
             .append("svg:svg")
             .attr("border", 1)
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", width)
+            .attr("height", height)
 
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+        this.area = this.svg
+            .append('g')
+            .attr('class', 'area')
+            .attr("transform", "translate(" + (marginArea.left + yAxisWidth) + "," + margin.top + ")");
+
+        // console.log()
+
+        var borderPath = this.area.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("height", height)
+            .attr("width", areaWidth)
+            .style("stroke", '#000')
+            .style("fill", "none")
+            .style("stroke-width", 1);
+
+
+
+        var rectangle = this.area.append("rect")
+                                    .attr("x", areaWidth  -  50)
+                                    .attr("y", 0)
+                                    .attr("width", 50)
+                                    .attr("height", 100);
+
 
         d3.json("/git", reloadView.bind(this))
     };
@@ -65,7 +110,7 @@ var CommitsVisualizer = function () {
 
 
         var xScale = d3.scaleTime()
-            .range([200, width])
+            .range([0, areaWidth - marginArea.right])
             .domain(d3.extent(data, dateCommitFn));
 
         var yScale = d3.scalePoint()
@@ -112,7 +157,7 @@ var CommitsVisualizer = function () {
         this.svg.call(tool_tip);
 
 
-        var circle = this.svg
+        var circle = this.area
             .selectAll("circle")
             .data(data)
             .attr("cx", xScaleByCommitDate)
@@ -161,14 +206,14 @@ var CommitsVisualizer = function () {
             .call(d3.axisLeft(yScale));
 
 
-        var d0 = new Date(2017, 0, 1),
-            d1 = new Date(2017, 0, 30);
-// Gratuitous intro zoom!
-        this.svg.call(zoom).transition()
-            .duration(1500)
-            .call(zoom.transform, d3.zoomIdentity
-                .scale(width / (xScale(d1) - xScale(d0)))
-                .translate(-xScale(d0), 0));
+//         var d0 = new Date(2017, 0, 1),
+//             d1 = new Date(2017, 0, 30);
+// // Gratuitous intro zoom!
+//         this.svg.call(zoom).transition()
+//             .duration(1500)
+//             .call(zoom.transform, d3.zoomIdentity
+//                 .scale(width / (xScale(d1) - xScale(d0)))
+//                 .translate(-xScale(d0), 0));
         g = this.svg;
     }
 
