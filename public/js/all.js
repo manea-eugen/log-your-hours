@@ -66,31 +66,16 @@ var g;
 
 var CommitsVisualizer = function () {
 
-    var margin = {top: 10, right: 10, bottom: 10, left: 10},
-        marginArea = {top: 10, right: 15, bottom: 10, left: 0},
-        // graphWidth = d3.select('#graph-placeholder').node().getBoundingClientRect().width,
-        graphWidth = 600,
+    var margin = {top: 10, right: 0, bottom: 10, left: 0},
+        marginArea = {top: 10, right: 10, bottom: 10, left: 10},
+        graphWidth = d3.select('#graph-placeholder').node().getBoundingClientRect().width,
         width = graphWidth - margin.left - margin.right,
         height = 600 - margin.top - margin.bottom,
-        areaHeight = height, // TO BE CALCULATED
-        xAxisHeight = 12,
-        yAxisWidth = 200,
-        areaWidth = width - marginArea.left- marginArea.right  - yAxisWidth;
+        yAxisHeight = 50,
+        xAxisWidth = 200,
+        areaWidth = width - marginArea.left - marginArea.right - margin.left  - margin.right - xAxisWidth ,
+        areaHeight = height - marginArea.top - marginArea.bottom - margin.top - margin.bottom - yAxisHeight ;
 
-console.log(graphWidth);
-console.log(margin.left);
-console.log(margin.right);
-console.log(width);
-console.log(marginArea.left);
-console.log(marginArea.right);
-console.log(areaWidth);
-
-
-
-
-
-    // console.log(width - marginArea.left - marginArea.right);
-    // console.log(areaHeight);
 
     var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
     var tooltipDateFormatter = d3.timeFormat("%d/%m : %A")
@@ -98,8 +83,6 @@ console.log(areaWidth);
     var dateCommitFn = function (d) {
         return strictIsoParse(d.commitDate)
     };
-
-
 
     var tool_tip = d3.tip()
         .attr("class", "d3-tip")
@@ -114,44 +97,47 @@ console.log(areaWidth);
 
         });
 
-
-
-
     this.init = function () {
-        this.svg = d3.select("#graph-placeholder")
+        var rootSvg = d3.select("#graph-placeholder")
             .append("svg:svg")
             .attr("border", 1)
             .attr("width", width)
-            .attr("height", height)
+            .attr("height", height);
 
+        var areaMask = rootSvg.append("defs")
+            .append("clipPath")
+            .attr("id", "areaMask")
+            .style("pointer-events", "none")
+            .append("rect")
+            .attr('x' , 0)
+            .attr('y' , margin.top )
+            .attr('width' ,areaWidth)
+            .attr('height' , areaHeight)
+
+        this.svg = rootSvg
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 
 
         this.area = this.svg
             .append('g')
             .attr('class', 'area')
-            .attr("transform", "translate(" + (marginArea.left + yAxisWidth) + "," + margin.top + ")");
+            .attr("clip-path", "url(#areaMask)")
 
-        // console.log()
+            .attr("transform", "translate(" + (marginArea.left + xAxisWidth) + ",0)")
 
-        var borderPath = this.area.append("rect")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("height", height)
-            .attr("width", areaWidth)
-            .style("stroke", '#000')
-            .style("fill", "none")
-            .style("stroke-width", 1);
+        var rect = this.area.append('rect')
 
+            .attr('x', 0)
+            .attr('y', 0)
+            .style("opacity", 0.7)
+            .attr('width', areaWidth)
+            .attr('height', areaHeight)
+            .style("fill", "white")
+            .style("pointer-events", "all")
 
-
-        var rectangle = this.area.append("rect")
-                                    .attr("x", areaWidth  -  50)
-                                    .attr("y", 0)
-                                    .attr("width", 50)
-                                    .attr("height", 100);
-
+        ;
 
         d3.json("/git", reloadView.bind(this))
     };
@@ -178,10 +164,14 @@ console.log(areaWidth);
             .domain(d3.extent(data, dateCommitFn));
 
         var yScale = d3.scalePoint()
-            .range([height - 20, 0])
+            .range([areaHeight, 0])
             .domain(data.map(function (d) {
                 return d.authorEmail
             }));
+
+        var xAxis = d3.axisBottom(xScale),
+            yAxis = d3.axisLeft(yScale);
+
 
         var xScaleByCommitDate = function (d) {
             return xScale(dateCommitFn(d))
@@ -199,16 +189,18 @@ console.log(areaWidth);
                 default:
                     return 'rgba(0,0,0,0.5)';
             }
-        }
+        };
 
         // TODO CONTINUES FROM HERE the zoom functionality https://bl.ocks.org/mbostock/431a331294d2b5ddd33f947cf4c81319
-
+        //
         var zoomed = function(){
             var t = d3.event.transform,
                 xt = t.rescaleX(xScale);
-            console.log(xt);
-            this.svg.select(".circle").attr("cx", xScaleByCommitDate)
-            // this.svg.select(".axis--x").call(xAxis.scale(xt));
+            this.area.selectAll(".circle").attr("cx", function (d) {
+                return xt(dateCommitFn(d))
+            });
+
+            this.svg.select(".xScale").call(xAxis.scale(xt));
         };
 
         var zoom = d3.zoom()
@@ -258,34 +250,37 @@ console.log(areaWidth);
         d3.selectAll('.xScale').remove();
         d3.selectAll('.yScale').remove();
 
-        // Add the xScale Axis
+        // Date scale
         this.svg.append("g")
             .attr("class", "xScale axis")
-            .attr("transform", "translate(0," + (height - xAxisHeight) + ")")
-            .call(d3.axisBottom(xScale));
-        // Add the yScale Axis
+            .attr("transform", "translate(" + (xAxisWidth + marginArea.left ) + "," + (areaHeight + marginArea.top) + ")")
+            .call(xAxis);
+
+        // Author scale
         this.svg.append("g")
             .attr("class", "yScale axis")
-            .attr("transform", "translate(200,0)")
-            .call(d3.axisLeft(yScale));
+            .attr("transform", "translate(" + (xAxisWidth ) + ",0)")
+            .call(yAxis);
 
 
-//         var d0 = new Date(2017, 0, 1),
-//             d1 = new Date(2017, 0, 30);
-// // Gratuitous intro zoom!
-//         this.svg.call(zoom).transition()
-//             .duration(1500)
-//             .call(zoom.transform, d3.zoomIdentity
-//                 .scale(width / (xScale(d1) - xScale(d0)))
-//                 .translate(-xScale(d0), 0));
+
+        var today = new Date(),
+            twoWeeksAgo  = d3.timeWeek.offset(new Date(), -2);
+
+        this.area.call(zoom)
+            .transition()
+            .duration(500   )
+            .call(zoom.transform, d3.zoomIdentity
+                .scale(areaWidth / (xScale(today) - xScale(twoWeeksAgo)))
+                .translate(-xScale(twoWeeksAgo), 0));
         g = this.svg;
     }
 
-}
+};
 
 
 $(function () {
-// Only init the chart on homepage
+    // Only init the chart on homepage
     if (window.location.pathname === '/') {
         var commitsVisualizer = new CommitsVisualizer();
         commitsVisualizer.init();
@@ -297,166 +292,6 @@ $(function () {
 
 
 });
-
-
-// TODO Find the right way to do this
-if (!document.getElementById('graph-placeholder')) {
-
-//     var margin = {top: 20, right: 20, bottom: 30, left: 40},
-// // width = 1900 - margin.left - margin.right,
-//         width = parseInt(d3.select('#graph-placeholder').style('width'), 10) - (margin.left + margin.right) - 15, // Minus css padding
-//         height = 600 - margin.top - margin.bottom,
-//         xAxisHeight = 12,
-//         svg = d3.select("#graph-placeholder")
-//             .append("svg:svg")
-//             .attr("border", 1)
-//             .attr("width", width + margin.left + margin.right)
-//             .attr("height", height + margin.top + margin.bottom)
-//
-//             .append("g")
-//             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-//
-
-
-    // var dateCommitFn = function (d) {
-    //     return strictIsoParse(d.commitDate)
-    // };
-    // var tooltipDateFormatter = d3.timeFormat("%d/%m : %A");
-
-    // var tool_tip = d3.tip()
-    //     .attr("class", "d3-tip")
-    //     .offset([-8, 0])
-    //     .html(function (d) {
-    //         return '<div class="panel radius">' +
-    //             '<h5>' + d.authorEmail + ' ' + d.authorName + '</h5>' +
-    //             '<p>' + d.repo.name + '</p>' +
-    //             '<p>' + d.message + '</p>' +
-    //             '<p>' + tooltipDateFormatter(strictIsoParse(d.commitDate)) + '</p>' +
-    //             '</div>'
-    //
-    //     });
-
-
-// load the data
-    d3.json("/git", function (error, data) {
-
-        var xScale = d3.scaleTime()
-            .range([200, width])
-            .domain(d3.extent(data, dateCommitFn));
-
-        var yScale = d3.scalePoint()
-            .range([height - 20, 0])
-            .domain(data.map(function (d) {
-                return d.authorEmail
-            }));
-
-        svg.call(tool_tip);
-
-        var circle = svg.append("g")
-            .selectAll("circle")
-            .data(data)
-            .enter()
-            .append("svg:circle")
-            .attr("class", "circle")
-            .attr("r", 4)
-            .attr("cx", function (d) {
-                return xScale(dateCommitFn(d))
-            })
-            .attr("cy", function (d) {
-                return yScale(d.authorEmail)
-            })
-            .attr("fill", function (d) {
-                switch (d.authorEmail) {
-                    case 'e.manea@youwe.nl':
-                        return 'lightblue';
-                        break;
-                    default:
-                        return 'rgba(0,0,0,0.5)';
-                }
-            })
-            .on('mouseover', tool_tip.show)
-            .on('mouseout', tool_tip.hide);
-
-        // Add the xScale Axis
-        svg.append("g")
-            .attr("class", "xScale axis")
-            .attr("transform", "translate(0," + (height - xAxisHeight) + ")")
-            .call(d3.axisBottom(xScale));
-        // Add the yScale Axis
-        svg.append("g")
-            .attr("class", "yScale axis")
-            .attr("transform", "translate(200,0)")
-            .call(d3.axisLeft(yScale));
-        // text label for the xScale axis
-        svg.append("text")
-            .attr("transform",
-                "translate(" + (width / 2) + " ," +
-                (height + margin.top) + ")")
-            .style("text-anchor", "middle")
-            .text("Date");
-    });
-
-    function updateData() {
-
-        var data = ['c'];
-
-        var circle = svg.selectAll("circle")
-            .data(data);
-
-
-        circle.exit().transition()
-            .duration(2000)
-            .attr("r", 0)
-            .remove();
-
-        // var enter = update.enter()
-        //     .append('circle')
-        //     .attr('r', 200)
-
-        var authorFieldValue = d3.select('#authorEmail').node().value,
-            repositoryValue = d3.select('#repositories').node().value;
-
-        var paramsUrl = 'authorEmail=' + authorFieldValue;
-        paramsUrl += '&repoId=' + repositoryValue;
-
-        // Get the data again
-        d3.json("/git?" + paramsUrl, function (error, data) {
-
-
-            var x = d3.scaleTime()
-                .range([200, width])
-                .domain(d3.extent(data, dateCommitFn));
-
-            var y = d3.scalePoint()
-                .range([height - 20, 0])
-                .domain(d3.extent(data, dateCommitFn));
-
-            // Select the section we want to apply our changes to
-            var svg = d3.select("#graph-placeholder").transition();
-            // svg.selectAll("circle").remove()
-
-            // Make the changes
-            var circle = svg.selectAll("circle")   // change the line
-                .duration(750)
-                .attr("cx", function (d) {
-                    return x(dateCommitFn(d))
-                })
-                .attr("cy", function (d) {
-                    return y(dateCommitFn(d))
-                })
-                .attr("fill", function (d) {
-                    return 'rgba(0,0,0,0.5)';
-                })
-            svg.select(".x.axis") // change the x axis
-                .duration(750)
-                .call(d3.axisBottom(x));
-            svg.select(".y.axis") // change the y axis
-                .duration(750)
-                .call(d3.axisLeft(y));
-
-        });
-    }
-}
 
 var ReposTable = {
     load: function () {

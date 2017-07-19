@@ -36,7 +36,6 @@ gulp.task('watch', function () {
 gulp.task('default', ['watch','js', 'sass', 'browser-sync']);
 
 gulp.task('browser-sync', ['nodemon'], function() {
-    console.log(browserSync);
     browserSync.init(null, {
         proxy: "http://localhost:5000",
         // files: ["public/**/*.*"],
