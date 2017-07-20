@@ -100,8 +100,7 @@ var GitRepoService = {
      * @param {Repository} commit
      */
     onFindCommitCallback: function (RepoModel, commit) {
-// console.log(commit);
-//         console.log(repo2)
+
         // Persist it
         var query = {commitSha: commit.sha()},
             data = {

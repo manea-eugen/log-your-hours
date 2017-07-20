@@ -5,14 +5,17 @@ block content
     .row
         .large-12.columns
             form
-                label
-                    i.fa.fa-spinner.fa-spin#repositoriesLoader
-                    |   Repository
-                    select#repositories
-                label
-                    i.fa.fa-spinner.fa-spin#authorEmailLoader
-                    |   Author
-                    select#authorEmail
+                .row
+                    label.large-6.columns
+                        i.fa.fa-spinner.fa-spin#repositoriesLoader
+                        |   Repository
+                        select#repositories
+                    label.large-6.columns
+                        i.fa.fa-spinner.fa-spin#authorEmailLoader
+                        |   Author
+                        select#authorEmail
     div
-        input#updateButton(name='updateButton', type='button', value='Update')
+        button#reloadButton.button(name='reloadButton', type='button')
+            i.fa.fa-refresh(aria-hidden='true')
+            |  Reload
     div#graph-placeholder

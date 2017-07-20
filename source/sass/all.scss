@@ -1,6 +1,13 @@
-div > svg{
+@import "site/graph";
+@import "site/tool-tip";
+
+
+
+// TODO MOVE THIS ONCE WE ARE DONE
+div > svg {
   border: 1px black solid;
 }
+
 .fullWidth {
   width: 100%;
   margin-left: auto;
@@ -8,18 +15,12 @@ div > svg{
   max-width: initial;
 }
 
-
-#repos-table{
+#repos-table {
   td {
     vertical-align: top;
   }
-  input[type="text"],button.tiny{
+  input[type="text"], button.tiny {
     margin: 0;
   }
 
-}
-
-
-.area{
-  overflow: hidden;
 }

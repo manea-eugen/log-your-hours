@@ -1,0 +1,24 @@
+#graph-placeholder {
+
+  .area {
+    overflow: hidden;
+  }
+
+  .yScale {
+    .tick {
+      cursor: pointer;
+    }
+  }
+  //fill: rgba(0, 0, 0, 0.6); // Black transparent
+  .active{
+    text {
+      fill: rgba(0,191,255, 1); // Deep Sky Blue
+    }
+  }
+  .circle {
+    fill: rgba(0, 0, 0, 0.6); // Black transparent
+    &.active{
+      fill: rgba(0,191,255, 0.8); // Light blue transparent
+    }
+  }
+}
