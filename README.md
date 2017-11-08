@@ -1,4 +1,4 @@
-# Log your shit bro
+# Log your s**t bro
 
 
 ### How to install
